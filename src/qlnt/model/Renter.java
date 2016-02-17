@@ -9,13 +9,15 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
-import qlnt.coonfig.connectdb.DBUtil;
+import qlnt.connectdb.DBUtil;
+import qlnt.util.CUDUtil;
 
 /**
  *
  * @author lehoang
  */
 public class Renter {
+
     private int idRenter;
     private String fullName;
     private int gender;
@@ -116,120 +118,62 @@ public class Renter {
 
     public Renter() {
     }
-    
-    
-    public boolean createRenter(Renter renter) throws Exception{
+
+    public void createRenter(Renter renter) throws Exception {
+        String sql = "INSERT INTO tbl_Renter(Full_Name, Gender, Birthday, ID_Card_Number, Phone_Number, Job, Address, Assets) VALUES(N'" + renter.getFullName() + "','" + renter.getGender() + "','" + renter.getBirthday() + "','" + renter.getIdCardNum() + "','" + renter.getPhoneNumber() + "',N'" + renter.getJob()+ "',N'" + renter.getAddress() + "', N'" + renter.getAssets() + "')";
+        CUDUtil.statementCUD(sql);
+    }
+
+    public void updateRenter(Renter renter) throws Exception {
+        String sql = "UPDATE tbl_Renter SET Full_Name = N'" + renter.getFullName() + "', Gender = " + renter.getGender() + ", Birthday = '" + renter.getBirthday() + "', Address = N'" + renter.getAddress() + "', Job = N'" + renter.getJob() + "', ID_Card_Number = '" + renter.getIdCardNum() + "', Assets = N'" + renter.getAssets() + "', Phone_Number = '" + renter.getPhoneNumber() + "' WHERE ID_Renter = " + renter.getIdRenter();
+        CUDUtil.statementCUD(sql);
+    }
+
+    public void deleteRenter(Renter renter) throws Exception {
+        String sql = "DELETE FROM tbl_Renter WHERE ID_Renter = " + renter.getIdRenter();
+        CUDUtil.statementCUD(sql);
+    }
+
+    public ArrayList<Renter> getRenters() throws Exception {
+        ArrayList<Renter> data = new ArrayList<Renter>();
         Connection conn = null;
         Statement st = null;
-        
-        conn = DBUtil.connectDB();
-        if(conn != null){
-            String sql = "INSERT INTO tbl_Renter(Full_Name, Gender, Birthday, ID_Card_Number, Phone_Number, Job, Address, Assets) VALUES('"+renter.getFullName()+"','"+renter.getGender()+"','"+renter.getBirthday()+"','"+renter.getIdCardNum()+"','"+renter.getPhoneNumber()+"','"+renter.getJob()
-                    +"','"+renter.getAddress()+"', '"+renter.getAssets()+"')";
-            try{
-                st = conn.createStatement();
-                int result = st.executeUpdate(sql);
-                if(result != 0){
-                    return true;
-                } else {
-                    return false;
-                }
-            } catch (Exception ex){
-                throw new Exception(ex.getMessage());
-            } finally {
-                if(st!=null) st.close();
-                conn.close();
-            }
-        } else {
-            return false;
-        }
-    }
-    
-    public boolean updateRenter(Renter renter) throws Exception{
-        Connection conn = DBUtil.connectDB();
-        Statement st = null;
-        
-        if(conn!=null){
-            String sql = "UPDATE tbl_Renter SET Full_Name = '"+renter.getFullName()+"', Gender = "+renter.getGender()+", Birthday = '"+renter.getBirthday()+"', Address = '"+renter.getAddress()+"', Job = '"+renter.getJob()+"', ID_Card_Number = '"+renter.getIdCardNum()+"', Assets = '"+renter.getAssets()+"', Phone_Number = '"+renter.getPhoneNumber()+"' WHERE ID_Renter = " + renter.getIdRenter();
-            try {
-                st = conn.createStatement();
-                int result = st.executeUpdate(sql);
-                if(result!=0){
-                    return true;
-                } else {
-                    return false;
-                }
-            } catch (Exception ex) {
-                throw new Exception(ex.getMessage());
-            } finally { 
-                if(st!=null) st.close();
-                conn.close();
-            }
-        } else {
-            return false;
-        }
-    }
-    
-    public boolean deleteRenter(Renter renter) throws Exception{
-        Connection conn = DBUtil.connectDB();
-        Statement st = null;
-        
-        if(conn!=null){
-            String sql = "DELETE FROM tbl_Renter WHERE ID_Renter = " + renter.getIdRenter();
-            try {
-                st = conn.createStatement();
-                int result = st.executeUpdate(sql);
-                if(result != 0){
-                   return true; 
-                } else {
-                    return false;
-                }
-            } catch (Exception ex) {
-                throw new Exception(ex.getMessage());
-            } finally {
-                if(st!= null) st.close();
-                conn.close();
-            }
-        } else {
-            return false;
-        }
-    }
-    
-    public ArrayList<Renter> getRenters() throws Exception{
-        ArrayList<Renter> data = new ArrayList<Renter>();
-        Connection conn = DBUtil.connectDB();
-        Statement st = null;
         ResultSet rs = null;
-        
-        if(conn!=null){
+        try {
+            conn = DBUtil.connectDB();
             String sql = "SELECT * FROM tbl_Renter";
-            try {
-                st = conn.createStatement();
-                rs = st.executeQuery(sql);
-                while(rs.next()){
-                    Renter renter = new Renter();
-                    renter.setFullName(rs.getString("Full_Name"));
-                    renter.setGender(rs.getInt("Gender"));
-                    renter.setBirthday(rs.getString("Birthday"));
-                    renter.setIdCardNum(rs.getString("ID_Card_Number"));
-                    renter.setPhoneNumber(rs.getString("Phone_Number"));
-                    renter.setJob(rs.getString("Job"));
-                    renter.setAddress(rs.getString("Address"));
-                    renter.setAssets(rs.getString("Assets"));
-                    data.add(renter);
-                }
-                
-                return data;
-            } catch (Exception ex) {
-                throw new Exception(ex.getMessage());
-            } finally {
-                if(rs!=null) rs.close();
-                if(st!=null) st.close();
+            st = conn.createStatement();
+            rs = st.executeQuery(sql);
+            while (rs.next()) {
+                Renter renter = new Renter();
+                renter.setIdRenter(rs.getInt("ID_Renter"));
+                renter.setFullName(rs.getString("Full_Name"));
+                renter.setGender(rs.getInt("Gender"));
+                renter.setBirthday(rs.getString("Birthday"));
+                renter.setIdCardNum(rs.getString("ID_Card_Number"));
+                renter.setPhoneNumber(rs.getString("Phone_Number"));
+                renter.setJob(rs.getString("Job"));
+                renter.setAddress(rs.getString("Address"));
+                renter.setAssets(rs.getString("Assets"));
+                data.add(renter);
+            }
+
+            return data;
+
+        } catch (Exception ex) {
+            throw new Exception(ex.getMessage());
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (st != null) {
+                st.close();
+            }
+            if (conn != null) {
                 conn.close();
             }
-        } else {
-            return data;
+
         }
     }
-    
+
 }

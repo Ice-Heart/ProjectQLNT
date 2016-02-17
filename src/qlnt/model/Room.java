@@ -9,15 +9,16 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
-import qlnt.coonfig.connectdb.DBUtil;
-
+import qlnt.connectdb.DBUtil;
+import qlnt.util.CUDUtil;
 
 /**
  *
  * @author lehoang
  */
 public class Room {
-    private int idRoom;
+
+    private int idRoom, idRoomType;
     private String roomName;
     private String description;
     private String Status;
@@ -30,6 +31,14 @@ public class Room {
         this.idRoom = idRoom;
     }
 
+    public int getIdRoomType() {
+        return idRoomType;
+    }
+
+    public void setIdRoomType(int idRoomType) {
+        this.idRoomType = idRoomType;
+    }
+    
     public String getRoomName() {
         return roomName;
     }
@@ -63,112 +72,88 @@ public class Room {
 
     public Room() {
     }
-    
-    public boolean createRoom(Room room) throws Exception{
-        Connection conn = DBUtil.connectDB();
-        Statement st = null;
-        
-        if(conn != null){
-            String sql = "INSERT INTO tbl_Room(Room_Name, Description, Status) VALUES('"+room.getRoomName()+"', '"+room.getDescription()+"', '"+room.getStatus()+"')";
-            try{
-                st = conn.createStatement();
-                int result = st.executeUpdate(sql);
-                if(result != 0){
-                    return true;
-                } else {
-                    return false;
-                }
-            }catch(Exception ex){
-                throw new Exception(ex.getMessage());
-            } finally {
-                if(st!=null) st.close();
-                conn.close();
-            }
-        } else {
-            return false;
-        }
+
+    public void createRoom(Room room) throws Exception {
+        String sql = "INSERT INTO tbl_Room(ID_Room_Type, Room_Name, Description, Status) VALUES("+room.getIdRoomType()+", N'" + room.getRoomName() + "', N'" + room.getDescription() + "', N'" + room.getStatus() + "')";
+        CUDUtil.statementCUD(sql);
+    }
+
+    public void updateRoom(Room room) throws Exception {
+        String sql = "UPDATE tbl_Room SET ID_Room_Type = "+room.getIdRoomType()+", Room_Name = N'" + room.getRoomName() + "', Description = N'" + room.getDescription() + "', Status = N'" + room.getStatus() + "' WHERE ID_Room = " + room.getIdRoom();
+        CUDUtil.statementCUD(sql);
+    }
+
+    public void deleteRoom(Room room) throws Exception {
+        String sql = "DELETE FROM tbl_Room WHERE ID_Room = " + room.getIdRoom();
+        CUDUtil.statementCUD(sql);
     }
     
-    public boolean updateRoom(Room room) throws Exception{
-        Connection conn = DBUtil.connectDB();
-        Statement st = null;
-        
-        if(conn != null){
-            String sql = "UPDATE tbl_Room SET Room_Name = '"+room.getRoomName()+"', Description = '"+room.getDescription()+"', Status = '"+room.getStatus()+"' WHERE ID_Room = "+room.getIdRoom();
-            try{
-                st = conn.createStatement();
-                int result = st.executeUpdate(sql);
-                if(result != 0){
-                    return true;
-                } else {
-                    return false;
-                }
-            }catch(Exception ex){
-                throw new Exception(ex.getMessage());
-            } finally {
-                if(st!=null) st.close();
-                conn.close();
-            }
-        } else {
-            return false;
-        }
-    }
-    
-    public boolean deleteRoom(Room room) throws Exception{
-        Connection conn = DBUtil.connectDB();
-        Statement st = null;
-        
-        if(conn != null){
-            String sql = "DELETE FROM tbl_Room WHERE ID_Room = "+room.getIdRoom();
-            try{
-                st = conn.createStatement();
-                int result = st.executeUpdate(sql);
-                if(result != 0){
-                    return true;
-                } else {
-                    return false;
-                }
-            }catch(Exception ex){
-                throw new Exception(ex.getMessage());
-            } finally {
-                if(st!=null) st.close();
-                conn.close();
-            }
-        } else {
-            return false;
-        }
-    }
-    
-    public ArrayList<Room> getRooms() throws Exception{
+
+    public ArrayList<Room> getRooms() throws Exception {
         ArrayList<Room> data = new ArrayList<Room>();
-        Connection conn = DBUtil.connectDB();
+        Connection conn = null;
+        Statement st = null;
+        ResultSet rs = null;
+        try {
+            conn = DBUtil.connectDB();
+            String sql = "SELECT * FROM tbl_Room";
+            st = conn.createStatement();
+            rs = st.executeQuery(sql);
+            while (rs.next()) {
+                Room room = new Room();
+                room.setIdRoom(rs.getInt("ID_Room"));
+                room.setIdRoomType(rs.getInt("ID_Room_Type"));
+                room.setRoomName(rs.getString("Room_Name"));
+                room.setDescription(rs.getString("Description"));
+                room.setStatus(rs.getString("Status"));
+                data.add(room);
+            }
+
+            return data;
+
+        } catch (Exception ex) {
+            throw new Exception(ex.getMessage());
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (st != null) {
+                st.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+    }
+    
+    public int getLastInsertID() throws Exception{
+        int id = 0;
+        Connection conn = null;
         Statement st = null;
         ResultSet rs = null;
         
-        if(conn!=null){
-            String sql = "SELECT * FROM tbl_Room";
-            try {
-                st = conn.createStatement();
-                rs = st.executeQuery(sql);
-                while(rs.next()){
-                    Room room = new Room();
-                    room.setIdRoom(rs.getInt("ID_Room"));
-                    room.setRoomName(rs.getString("Room_Name"));
-                    room.setDescription(rs.getString("Description"));
-                    room.setStatus(rs.getString("Status"));
-                    data.add(room);
-                }
-                
-                return data;
-            } catch (Exception ex) {
-                throw new Exception(ex.getMessage());
-            } finally {
-                if(rs!=null) rs.close();
-                if(st!=null) st.close();
+        try {
+            conn = DBUtil.connectDB();
+            String sql = "SELECT TOP 1 ID_Room FROM tbl_Room ORDER BY ID_Room DESC";
+            st = conn.createStatement();
+            rs = st.executeQuery(sql);
+            while(rs.next()){
+                id = rs.getInt("ID_Room");
+            }
+            return id;
+        } catch (Exception ex) {
+            throw new Exception(ex.getMessage());
+        } finally {
+            if(rs!=null){
+                rs.close();
+            }
+            if(st!=null){
+                st.close();
+            }
+            if(conn!=null){
                 conn.close();
             }
-        } else {
-            return data;
         }
     }
+    
 }

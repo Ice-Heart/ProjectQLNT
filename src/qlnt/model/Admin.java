@@ -10,8 +10,8 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
-import qlnt.coonfig.connectdb.DBUtil;
-import qlnt.model.validate.ValidateDataUtil;
+import qlnt.connectdb.DBUtil;
+import qlnt.util.ValidateDatabaseUtil;
 
 /**
  *
@@ -80,157 +80,184 @@ public class Admin {
     }
 
     public boolean createAdmin(Admin admin) throws Exception {
-        Connection conn = null;
-        Statement st = null;
+        try {
 
-        conn = DBUtil.connectDB();
-        if (conn != null) {
-            String sql = "INSERT INTO tbl_Admin(Username, Password, Email, Status) VALUES('" + admin.getUsername() + "', '" + ValidateDataUtil.encodePass(admin.getPassword()) + "', '" + admin.getEmail() + "', '" + admin.getStatus() + "')";
-            try {
+            Connection conn = null;
+            Statement st = null;
 
-                st = conn.createStatement();
+            conn = DBUtil.connectDB();
+            if (conn != null) {
+                String sql = "INSERT INTO tbl_Admin(Username, Password, Email, Status) VALUES('" + admin.getUsername() + "', '" + ValidateDatabaseUtil.encodePass(admin.getPassword()) + "', '" + admin.getEmail() + "', '" + admin.getStatus() + "')";
+                try {
 
-                int result = st.executeUpdate(sql);
-                if (result != 0) {
-                    return true;
-                } else {
-                    return false;
+                    st = conn.createStatement();
+
+                    int result = st.executeUpdate(sql);
+                    if (result != 0) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                } catch (Exception ex) {
+                    throw new Exception(ex.getMessage());
+                } finally {
+                    if (st != null) {
+                        st.close();
+                    }
+                    conn.close();
                 }
-            } catch (Exception ex) {
-                throw new Exception(ex.getMessage());
-            } finally {
-                if (st != null) {
-                    st.close();
-                }
-                conn.close();
+            } else {
+                return false;
             }
-        } else {
-            return false;
+        } catch (Exception ex) {
+            throw new Exception(ex.getMessage());
         }
 
     }
 
     public boolean deleteAdmin(Admin admin) throws Exception {
-        Connection conn = null;
-        Statement st = null;
+        try {
 
-        conn = DBUtil.connectDB();
-        if (conn != null) {
-            try {
-                String sql = "DELETE FROM tbl_Admin WHERE ID_Admin = " + admin.getIdAdmin();
-                st = conn.createStatement();
-                int result = st.executeUpdate(sql);
-                if (result != 0) {
-                    return true;
-                } else {
-                    return false;
+            Connection conn = null;
+            Statement st = null;
+
+            conn = DBUtil.connectDB();
+            if (conn != null) {
+                try {
+                    String sql = "DELETE FROM tbl_Admin WHERE ID_Admin = " + admin.getIdAdmin();
+                    st = conn.createStatement();
+                    int result = st.executeUpdate(sql);
+                    if (result != 0) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                } catch (Exception ex) {
+                    throw new Exception(ex.getMessage());
+                } finally {
+                    if (st != null) {
+                        st.close();
+                    }
+                    conn.close();
                 }
-            } catch (Exception ex) {
-                throw new Exception(ex.getMessage());
-            } finally {
-                if(st!=null) st.close();
-                conn.close();
+            } else {
+                return false;
             }
-        } else {
-            return false;
+        } catch (Exception ex) {
+            throw new Exception(ex.getMessage());
         }
     }
 
     public boolean updateAdmin(Admin admin) throws Exception {
-        Connection conn = null;
-        Statement st = null;
+        try {
 
-        conn = DBUtil.connectDB();
-        if (conn != null) {
-            try {
-                String sql = "UPDATE tbl_Admin SET Password = '" + ValidateDataUtil.encodePass(admin.getPassword()) + "', Email = '" + admin.getEmail() + "', Status = '" + admin.getStatus() + "' WHERE ID_Admin = "+admin.getIdAdmin();
-                st = conn.createStatement();
-                int result = st.executeUpdate(sql);
-                if (result != 0) {
-                    return true;
-                } else {
-                    return false;
+            Connection conn = null;
+            Statement st = null;
+
+            conn = DBUtil.connectDB();
+            if (conn != null) {
+                try {
+                    String sql = "UPDATE tbl_Admin SET Password = '" + ValidateDatabaseUtil.encodePass(admin.getPassword()) + "', Email = '" + admin.getEmail() + "', Status = '" + admin.getStatus() + "' WHERE ID_Admin = " + admin.getIdAdmin();
+                    st = conn.createStatement();
+                    int result = st.executeUpdate(sql);
+                    if (result != 0) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                } catch (Exception ex) {
+                    throw new Exception(ex.getMessage());
+                } finally {
+                    if (st != null) {
+                        st.close();
+                    }
+                    conn.close();
                 }
-            } catch (Exception ex) {
-                throw new Exception(ex.getMessage());
-            } finally {
-                if (st != null) {
-                    st.close();
-                }
-                conn.close();
+            } else {
+                return false;
             }
-        } else {
-            return false;
+        } catch (Exception ex) {
+            throw new Exception(ex.getMessage());
         }
     }
 
     public ArrayList<Admin> getAdmins() throws Exception {
-        ArrayList<Admin> data = null;
-        Connection conn = DBUtil.connectDB();
-        Statement st = null;
-        ResultSet rs = null;
+        try {
 
-        if (conn != null) {
-            String sql = "SELECT * FROM tbl_Admin";
-            try {
-                st = conn.createStatement();
-                rs = st.executeQuery(sql);
-                while (rs.next()) {
-                    Admin admin = new Admin();
-                    admin.setIdAdmin(rs.getInt("ID_Admin"));
-                    admin.setUsername(rs.getString("Username"));
-                    admin.setPassword(rs.getString("Password"));
-                    admin.setEmail(rs.getString("Email"));
-                    admin.setStatus(rs.getString("Status"));
-                    data.add(admin);
+            ArrayList<Admin> data = null;
+            Connection conn = DBUtil.connectDB();
+            Statement st = null;
+            ResultSet rs = null;
+
+            if (conn != null) {
+                String sql = "SELECT * FROM tbl_Admin";
+                try {
+                    st = conn.createStatement();
+                    rs = st.executeQuery(sql);
+                    while (rs.next()) {
+                        Admin admin = new Admin();
+                        admin.setIdAdmin(rs.getInt("ID_Admin"));
+                        admin.setUsername(rs.getString("Username"));
+                        admin.setPassword(rs.getString("Password"));
+                        admin.setEmail(rs.getString("Email"));
+                        admin.setStatus(rs.getString("Status"));
+                        data.add(admin);
+                    }
+                    return data;
+                } catch (Exception ex) {
+                    throw new Exception(ex.getMessage());
+                } finally {
+                    if (rs != null) {
+                        rs.close();
+                    }
+                    if (st != null) {
+                        rs.close();
+                    }
+                    conn.close();
                 }
+            } else {
                 return data;
-            } catch (Exception ex) {
-                throw new Exception(ex.getMessage());
-            } finally {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (st != null) {
-                    rs.close();
-                }
-                conn.close();
             }
-        } else {
-            return data;
+        } catch (Exception ex) {
+            throw new Exception(ex.getMessage());
         }
     }
 
     public boolean loginAdmin(Admin admin) throws Exception {
-        Connection conn = null;
-        Statement st = null;
-        ResultSet rs = null;
+        try {
 
-        conn = DBUtil.connectDB();
+            Connection conn = null;
+            Statement st = null;
+            ResultSet rs = null;
 
-        if (conn != null) {
-            String sql = "SELECT * FROM tbl_Admin WHERE Username = '" + admin.getUsername() + "' AND Password = '" + ValidateDataUtil.encodePass(admin.getPassword()) + "'";
-            try {
-                st = conn.createStatement();
-                rs = st.executeQuery(sql);
-                if (rs.next()) {
-                    return true;
-                } else {
-                    return false;
+            conn = DBUtil.connectDB();
+
+            if (conn != null) {
+                String sql = "SELECT * FROM tbl_Admin WHERE Username = '" + admin.getUsername() + "' AND Password = '" + ValidateDatabaseUtil.encodePass(admin.getPassword()) + "'";
+                try {
+                    st = conn.createStatement();
+                    rs = st.executeQuery(sql);
+                    if (rs.next()) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                } catch (Exception ex) {
+                    throw new Exception(ex.getMessage());
+                } finally {
+                    if (rs != null) {
+                        rs.close();
+                    }
+                    if (st != null) {
+                        st.close();
+                    }
+                    conn.close();
                 }
-            } catch (Exception ex) {
-                throw new Exception(ex.getMessage());
-            } finally {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (st != null) {
-                    st.close();
-                }
-                conn.close();
+            } else {
+                return false;
             }
-        } else {
-            return false;
+        } catch (Exception ex) {
+            throw new Exception(ex.getMessage());
         }
 
     }
